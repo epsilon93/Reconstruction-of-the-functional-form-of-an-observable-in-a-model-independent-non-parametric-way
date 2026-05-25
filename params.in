@@ -1,0 +1,109 @@
+# =====================================================================
+#   Eigenfunction reconstruction + PyMC inference -- input parameters
+# ---------------------------------------------------------------------
+#   Edit the values below and run:
+#
+#       python run_eigen.py               (reads ./params.in)
+#       python run_eigen.py other.in      (reads an alternate file)
+#
+#   Rules:
+#     - Lines starting with '#' and blank lines are ignored.
+#     - Text after '#' on a line is a trailing comment.
+#     - Leave a value blank to fall back to the script's built-in default.
+#     - Booleans: true / false  (also yes/no, on/off, 1/0).
+# =====================================================================
+
+# ------------------- Pipeline control -------------------
+# Which main stages to run.  Choose one of:
+#   stages = 1     -> only Stage 1 (PCA reconstruction)
+#   stages = 2     -> only Stage 2 (PyMC sampling; requires Stage-1 outputs on disk)
+#   stages = 1,2   -> both          (default)
+stages       = 2
+
+# ------------------- I/O paths -------------------
+input_dir    = ./inputFolder         # folder containing data_file and prior_file
+output_dir   = ./outputFiles         # created automatically if it does not exist
+data_file    = data_file.dat         # 3 columns: z, H(z), sigma_H
+prior_file   = input.dat             # 2 columns: r1_upper, step_size
+tag          = withParamInit_fn1     # suffix appended to every Stage-1 output
+
+# ------------------- Model parameters -------------------
+num_param    = 7                     # P : number of basis functions
+l100         = 10                    # L : grid resolution per parameter
+data_points  =                       # blank -> auto-detect from data_file
+total_rows   = 1350                  # NR : number of prior patches (n_z * n_dp)
+
+# ------------------- Runtime (Stage 1) -------------------
+processes    = 0                     # 0 = use all available CPU cores
+chunk        = 5000                  # grid points evaluated per chunk
+
+# ------------------- Plotting (Stage 1) -------------------
+no_plot      = false                 # true = skip Stage-1 PNG output
+plot_show    = false                 # true = also open an interactive window
+
+# ------------------- Stage 0 : prior-patch generation -------------------
+# Only relevant when Stage 1 is selected; silently skipped otherwise.
+generate_prior  = true               # false = reuse existing input.dat
+prior_n_z       = 30                 # number of zero-position values
+prior_n_dp      = 45                 # number of step-size values  (30 * 45 = 1350)
+prior_dp_min    = 1e-3
+prior_dp_max    = 1.0
+prior_z_min     = 1.5
+prior_z_max     =                    # blank -> l100 - 0.5
+prior_linear_dp = false               # true = linear dp grid; false = log
+
+# ------------------- Stage 2 : PyMC MCMC + corner plot -------------------
+# Inputs are constructed automatically from input_dir / output_dir / tag / num_param:
+#     data file       : <input_dir>/<data_file>
+#     prior patches   : <output_dir>/DATA_<tag>.txt
+#     PCA coefficients: <output_dir>/resultant_coff_<tag>_h0_<num_param>.txt
+# When stages includes 2 but not 1, the wrapper checks these exist on disk
+# and aborts with a clear error if they don't.
+
+pymc_output_dir     =                       # blank -> <output_dir>/pymc
+pymc_reduction      = 1                     # n_p_f = num_param - reduction
+pymc_chi_num        = 33                    # chi^2 cut on prior patches
+pymc_function_type  = 1                     # 1 -> (One,Two)=(1,1); 2 -> (0,1)
+pymc_data_type      = 0                     # 0 = real; 1 = simulated/fiducial
+pymc_sim_points     = 100                   # number of synthetic redshift points
+
+# Sampler controls (pm.sample / JAX dispatcher)
+pymc_NP             = 2000                  # draws per chain
+pymc_tune           = 1000                  # tuning steps per chain
+pymc_chains         = 2                     # number of chains
+pymc_cores          = 1                     # parallel cores (PyTensor backends only)
+pymc_seed           = 8927
+
+# ---- Sampler selection -----------------------------------------------
+# PyTensor backends (slow when pytensor.config.cxx="" on Apple Silicon):
+#   nuts            No-U-Turn Sampler
+#   hmc             Hamiltonian Monte Carlo
+#   metropolis      Metropolis-Hastings (gradient-free)
+#
+# JAX backends (fast on Apple Silicon; bypass the C-backend issue):
+#   nuts-numpyro    NUTS via NumPyro + JAX     (pip install numpyro jax jaxlib)
+#   nuts-blackjax   NUTS via BlackJAX + JAX    (pip install blackjax jax jaxlib)
+pymc_sampler           = nuts
+
+# Shared NUTS / HMC tuning target (used by all NUTS variants and HMC; ignored for metropolis)
+pymc_target_accept     = 0.9
+
+# HMC-only knobs (blank => PyMC defaults)
+pymc_hmc_path_length   =               # default 2.0
+pymc_hmc_step_scale    =               # default 0.25
+
+# Metropolis-only knobs (blank => PyMC defaults)
+pymc_mh_scaling        =               # default 1.0
+pymc_mh_tune_interval  =               # default 100
+
+# JAX-only knob (only for nuts-numpyro and nuts-blackjax; ignored otherwise)
+#   parallel    -> each chain on its own JAX device  (default; recommended)
+#   vectorized  -> vmap all chains on one device     (faster for many short chains)
+#   sequential  -> one chain at a time               (debugging)
+pymc_jax_chain_method  = parallel
+
+# Output filenames (inside pymc_output_dir)
+pymc_plot_file      = pymc_pairplot.png
+pymc_trace_file     = pymc_trace.pkl
+pymc_plot_vars      = OmegaM,Coff1,Coff2,Coff3,beta   # H_C derived from OmegaM, so omitted
+pymc_show           = false                 # true = open interactive window
