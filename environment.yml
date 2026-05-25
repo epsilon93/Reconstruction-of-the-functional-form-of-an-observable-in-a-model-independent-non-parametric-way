@@ -1,0 +1,39 @@
+name: pca-recon
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.11
+
+  # Core numerics
+  - numpy>=1.24,<2.0
+  - scipy>=1.10
+
+  # PCA / eigenfunction pipeline (pcaSourceCode.py, generate_prior.py)
+  - tqdm>=4.65
+
+  # PyMC MCMC pipeline (pymc_main.py)
+  - pymc>=5.0
+  - pytensor>=2.18
+  - arviz>=0.17
+  - sympy>=1.12
+
+  # Plotting
+  - matplotlib>=3.7
+
+  # pip-only extras (optional JAX samplers for pymc_main.py --sampler nuts-numpyro / nuts-blackjax)
+  - pip
+  - pip:
+    # Uncomment ONE or BOTH blocks depending on which JAX backend you want:
+    #
+    # Block A – NumPyro backend  (--sampler nuts-numpyro)
+    # - jax>=0.4
+    # - jaxlib>=0.4
+    # - numpyro>=0.14
+    #
+    # Block B – BlackJAX backend  (--sampler nuts-blackjax)
+    # - jax>=0.4
+    # - jaxlib>=0.4
+    # - blackjax>=1.0
