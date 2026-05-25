@@ -2,6 +2,10 @@
 
 A scientific computing pipeline for eigenfunction/PCA-based spectral reconstruction, developed for astrophysics and observational data analysis.
 
+## Description
+
+This repository provides a modular, reproducible Python pipeline for eigenfunction decomposition and PCA-based spectral reconstruction of astrophysical observational data. The core engine (`pcaSourceCode.py`) is a rigorously verified port of a legacy Fortran program, implementing covariance matrix construction from input spectra, full eigen-decomposition, chi-squared minimisation against a prior, and reconstruction at multiple user-specified truncation levels. A lightweight wrapper (`run_eigen.py`) driven by a single parameter file (`params.in`) enables end-to-end execution with a single command, while `generate_prior.py` automates the construction of prior patch files parametrised by zero-position and step size. The pipeline is designed for reproducibility, modularity, and straightforward extension to new datasets or reconstruction schemes.
+
 ---
 
 ## Repository Structure
