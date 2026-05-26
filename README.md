@@ -171,13 +171,6 @@ Input data files (prior files, observational spectra) are **not** included in th
 
 ---
 
-## Known Limitations & Open Questions
-
-- The prior file generation logic in `generate_prior.py` may not exactly match the original Fortran `input.dat` generator. If the original `input.dat` is located, `generate_prior.py` should be updated to replicate its enumeration pattern precisely — the Fortran source contains non-standard cumulative counting logic that does not correspond to standard enumeration.
-- Bit-for-bit verification of the Fortran-to-Python translation across multiple parameter combinations is recommended before treating any ported module as production-ready.
-
----
-
 ## Contributing
 
 This is a research codebase under active development. If you find a bug or discrepancy against the original Fortran behaviour, please open an issue with a minimal reproducible example and the parameter set used.
